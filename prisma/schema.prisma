@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  description  String?
+  shortDesc    String?
+  mrp          Int              // Price in paise
+  sellingPrice Int              // Price in paise
+  sku          String           @unique
+  weight       Int?             // Weight in grams
+  dimensions   String?
+  material     String?
+  color        String?
+  isActive     Boolean          @default(true)
+  isFeatured   Boolean          @default(false)
+  stockQty     Int              @default(0)
+  categoryId   String
+  category     Category         @relation(fields: [categoryId], references: [id])
+  images       ProductImage[]
+  variants     ProductVariant[]
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id           String     @id @default(cuid())
+  name         String     // e.g., "Size", "Color"
+  value        String     // e.g., "Large", "Brown"
+  priceAdjust  Int        @default(0) // Price adjustment in paise
+  stockQty     Int        @default(0)
+  sku          String?    @unique
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  createdAt    DateTime   @default(now())
+
+  @@map("product_variants")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  firstName     String
+  lastName      String
+  phone         String?
+  isAdmin       Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  passwordHash  String
+  emailVerified Boolean   @default(false)
+  cart          Cart?
+  orders        Order[]
+  addresses     Address[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  firstName  String
+  lastName   String
+  company    String?
+  address1   String
+  address2   String?
+  city       String
+  state      String
+  pincode    String
+  country    String  @default("India")
+  phone      String?
+  isDefault  Boolean @default(false)
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
+  createdAt  DateTime @default(now())
+
+  @@map("addresses")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String          @id @default(cuid())
+  quantity    Int
+  cartId      String
+  cart        Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id])
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  createdAt   DateTime        @default(now())
+
+  @@unique([cartId, productId, variantId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  orderNumber     String       @unique
+  status          OrderStatus  @default(PENDING)
+  subtotal        Int          // Amount in paise
+  taxAmount       Int          @default(0)
+  shippingAmount  Int          @default(0)
+  discountAmount  Int          @default(0)
+  totalAmount     Int          // Amount in paise
+  currency        String       @default("INR")
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String?
+  razorpayOrderId String?      @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  addressId       String
+  address         Address      @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+  couponCode      String?
+  notes           String?
+  invoiceData     Json?        // GST and invoice related data
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String          @id @default(cuid())
+  quantity      Int
+  unitPrice     Int             // Price in paise at time of order
+  totalPrice    Int             // Total price in paise
+  orderId       String
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id])
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+  productName   String          // Snapshot of product name
+  productSku    String          // Snapshot of product SKU
+  createdAt     DateTime        @default(now())
+
+  @@map("order_items")
+}
+
+model Coupon {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  name         String
+  description  String?
+  type         CouponType
+  value        Int        // Percentage or amount in paise
+  minAmount    Int?       // Minimum order amount in paise
+  maxDiscount  Int?       // Maximum discount in paise
+  usageLimit   Int?
+  usedCount    Int        @default(0)
+  isActive     Boolean    @default(true)
+  startsAt     DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime   @default(now())
+
+  @@map("coupons")
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String
+  content   Json     // Flexible content structure
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("content_blocks")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String
+  userId     String?
+  changes    Json?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
