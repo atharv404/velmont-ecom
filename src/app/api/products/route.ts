@@ -44,18 +44,7 @@ export async function GET(request: NextRequest) {
       skip
     })
 
-    // Transform prices from paise to rupees for frontend
-    const transformedProducts = products.map(product => ({
-      ...product,
-      mrp: product.mrp / 100,
-      sellingPrice: product.sellingPrice / 100,
-      variants: product.variants.map(variant => ({
-        ...variant,
-        priceAdjust: variant.priceAdjust / 100
-      }))
-    }))
-
-    return NextResponse.json({ products: transformedProducts })
+    return NextResponse.json({ products })
 
   } catch (error) {
     console.error('Products fetch error:', error)

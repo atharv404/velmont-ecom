@@ -38,18 +38,7 @@ export async function GET(
       )
     }
 
-    // Transform prices from paise to rupees for frontend
-    const transformedProduct = {
-      ...product,
-      mrp: product.mrp / 100,
-      sellingPrice: product.sellingPrice / 100,
-      variants: product.variants.map(variant => ({
-        ...variant,
-        priceAdjust: variant.priceAdjust / 100
-      }))
-    }
-
-    return NextResponse.json({ product: transformedProduct })
+    return NextResponse.json({ product })
 
   } catch (error) {
     console.error('Product fetch error:', error)
@@ -94,18 +83,7 @@ export async function POST(
       )
     }
 
-    // Transform prices from paise to rupees for frontend
-    const transformedProduct = {
-      ...product,
-      mrp: product.mrp / 100,
-      sellingPrice: product.sellingPrice / 100,
-      variants: product.variants.map(variant => ({
-        ...variant,
-        priceAdjust: variant.priceAdjust / 100
-      }))
-    }
-
-    return NextResponse.json({ product: transformedProduct })
+    return NextResponse.json({ product })
 
   } catch (error) {
     console.error('Product fetch error:', error)
