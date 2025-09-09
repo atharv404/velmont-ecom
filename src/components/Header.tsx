@@ -81,7 +81,7 @@ export default function Header() {
               </span>
             </Link>
             <Link 
-              href="/account" 
+              href="/auth/login" 
               className="text-gray-700 hover:text-amber-900 transition-colors"
             >
               <UserIcon className="h-6 w-6" />
@@ -136,11 +136,11 @@ export default function Header() {
                 ))}
                 <hr className="my-4" />
                 <Link
-                  href="/account"
+                  href="/auth/login"
                   className="block text-gray-700 hover:text-amber-900 font-medium py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  My Account
+                  Login / Register
                 </Link>
                 <Link
                   href="/track-order"
