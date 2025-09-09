@@ -52,6 +52,8 @@ A modern, production-ready e-commerce website for premium leather accessories bu
    cp .env.example .env.local
    ```
    
+   📖 **For detailed setup instructions and where to get each environment variable, see [SETUP.md](SETUP.md)**
+   
    Fill in your environment variables:
    ```env
    # Database
@@ -168,6 +170,29 @@ npm run db:seed      # Seed database with sample data
 - **Orders**: Order management with items
 - **Users**: Customer accounts and addresses
 - **Cart**: Shopping cart persistence
+
+## 🎯 Current Project Status
+
+### ✅ **Completed Features**
+- **Frontend Pages**: Product catalog, categories, cart, product details
+- **Database Schema**: Complete database design with Prisma ORM
+- **Responsive Design**: Mobile-first UI with Tailwind CSS
+- **Sample Data**: Seeded products, categories, and admin user
+- **Basic Structure**: Next.js 14 app router setup
+
+### 🔄 **In Active Development**
+- **Payment Integration**: Razorpay implementation (planned)
+- **Authentication System**: User login/registration (planned)
+- **Admin Panel**: Product and order management (planned)
+
+### ⚠️ **Not Yet Implemented**
+- **User Authentication**: No login/registration system
+- **Admin Login**: Admin panel requires development
+- **Payment Processing**: Razorpay integration incomplete
+- **Order System**: No checkout or order management
+- **API Routes**: Backend APIs need implementation
+
+📖 **For setup instructions and admin access details, see [SETUP.md](SETUP.md)**
 
 ## 🎯 Roadmap
 
